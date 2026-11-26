@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>Cladi Fit — know which size closes before you order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --paper:#F7F6F3; --line:#E7E4DD; --ink:#131210; --ink-dim:#6B6A63;
+    --accent:#A8542E; --accent-soft:#F3E4DA; --ok:#2F6B4F; --ok-soft:#E3EFE7;
+    --tape:#E9D49A; --tape-edge:#D6BC74; --tape-ink:#2A2418;
+    --on-ink:#FFFFFF;
+    color-scheme:light;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  /* Light only, to match the Cladi landing page */
+  html{ color-scheme:light only; background:#FFFFFF; }
+  html{ scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px); scroll-behavior:smooth; }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  body::before{ content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:10; background:var(--bg); }
+  a{ color:inherit; }
+  button,input,select,textarea{ font:inherit; color:inherit; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+  .display{ font-family:'Archivo','Arial Narrow',sans-serif; font-weight:700; letter-spacing:-0.015em; line-height:1.04; }
+
+  /* nav */
+  nav.top{ position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg); border-bottom:1px solid var(--line); }
+  nav.top .wrap{ height:62px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+  .wordmark{ font-family:'Archivo',sans-serif; font-weight:700; font-size:19px; letter-spacing:0.24em; text-transform:uppercase; text-decoration:none; }
+  .wordmark small{ font-size:11px; letter-spacing:0.08em; font-weight:600; color:var(--accent); margin-left:6px; text-transform:none; }
+  .nav-links{ display:flex; gap:26px; font-size:14px; color:var(--ink-dim); }
+  .nav-links a{ text-decoration:none; }
+  .nav-links a:hover{ color:var(--ink); }
+  @media (max-width:640px){ .nav-links a:not(.keep){ display:none; } }
+
+  .btn{
+    font-family:'Archivo',sans-serif; font-weight:600; font-size:14px; letter-spacing:0.01em;
+    padding:13px 22px; border:1px solid var(--ink); background:var(--ink); color:var(--on-ink);
+    cursor:pointer; text-decoration:none; display:inline-block; border-radius:2px;
+  }
+  .btn.ghost{ background:transparent; color:var(--ink); }
+  .btn:hover{ opacity:.85; }
+
+  /* hero */
+  .hero{ padding:64px 0 28px; }
+  .hero-grid{ display:grid; grid-template-columns:1.25fr 1fr; gap:48px; align-items:end; }
+  .hero h1{ font-size:clamp(36px,6vw,72px); font-stretch:92%; }
+  .hero h1 .num{ font-stretch:125%; font-weight:800; }
+  .hero p.lede{ color:var(--ink-dim); font-size:17px; max-width:44ch; }
+  .hero .lede strong{ color:var(--ink); font-weight:600; }
+  @media (max-width:860px){ .hero-grid{ grid-template-columns:1fr; gap:18px; } .hero{ padding-top:40px; } }
+
+  /* tool */
+  .tool{ border:1px solid var(--line); background:var(--bg); margin-bottom:96px; }
+  .tool-head{ display:flex; flex-wrap:wrap; gap:12px 24px; justify-content:space-between; align-items:center; padding:16px 22px; border-bottom:1px solid var(--line); background:var(--paper); }
+  .item-name{ font-weight:600; font-size:15px; }
+  .item-name span{ color:var(--ink-dim); font-weight:400; }
+  .seg{ display:inline-flex; border:1px solid var(--ink); border-radius:2px; overflow:hidden; }
+  .seg button{ border:0; background:transparent; padding:7px 13px; font-size:13px; font-weight:500; cursor:pointer; }
+  .seg button[aria-pressed="true"]{ background:var(--ink); color:var(--on-ink); }
+  .tool-body{ display:grid; grid-template-columns:330px 1fr; }
+  .inputs{ padding:24px 22px; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:20px; }
+  @media (max-width:900px){ .tool-body{ grid-template-columns:1fr; } .inputs{ border-right:0; border-bottom:1px solid var(--line); } }
+  .field label, .field .lab{ display:block; font-size:13px; font-weight:600; margin-bottom:7px; }
+  .field .hint{ font-weight:400; color:var(--ink-dim); }
+  .num-row{ display:flex; align-items:center; gap:12px; }
+  .num-row input[type=range]{ flex:1; accent-color:var(--accent); }
+  .num-in{ width:84px; padding:9px 10px; border:1px solid var(--line); background:var(--bg); border-radius:2px; font-variant-numeric:tabular-nums; }
+  .num-in:focus{ border-color:var(--ink); outline:none; }
+  .pair{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .pair .num-in{ width:100%; }
+  .choice{ display:flex; flex-wrap:wrap; gap:6px; }
+  .choice button{ border:1px solid var(--line); background:var(--bg); padding:8px 12px; font-size:13px; cursor:pointer; border-radius:2px; }
+  .choice button[aria-pressed="true"]{ border-color:var(--ink); background:var(--ink); color:var(--on-ink); }
+  .saved{ font-size:12.5px; color:var(--ink-dim); }
+
+  .results{ padding:26px 26px 28px; min-width:0; }
+  .verdict{ display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:center; }
+  .verdict .big{
+    font-family:'Archivo',sans-serif; font-weight:800; font-stretch:125%;
+    font-size:clamp(64px,9vw,104px); line-height:.9; color:var(--accent); min-width:1.2ch;
+  }
+  .verdict h2{ font-size:clamp(22px,2.6vw,28px); }
+  .verdict p{ color:var(--ink-dim); margin-top:8px; max-width:58ch; font-size:15.5px; }
+  .verdict p strong{ color:var(--ink); font-weight:600; }
+  @media (max-width:520px){ .verdict{ grid-template-columns:1fr; gap:6px; } }
+
+  /* tape */
+  .tape-block{ margin-top:30px; }
+  .tape-caption{ font-size:13px; color:var(--ink-dim); margin-bottom:10px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .key{ display:inline-flex; align-items:center; gap:6px; margin-right:14px; }
+  .key i{ width:14px; height:8px; display:inline-block; border-radius:1px; }
+  .key .k-zone{ background:repeating-linear-gradient(135deg,var(--ok) 0 2px,transparent 2px 5px); border:1px solid var(--ok); }
+  .key .k-you{ width:3px; height:12px; background:var(--accent); }
+  .tape-stage{ position:relative; height:176px; }
+  .flag{
+    position:absolute; transform:translateX(-50%); text-align:center; font-size:12.5px; white-space:nowrap;
+    font-variant-numeric:tabular-nums; cursor:pointer; background:none; border:0; padding:0 2px;
+  }
+  .flag b{ display:block; font-family:'Archivo',sans-serif; font-weight:700; font-size:14px; }
+  .flag .stem{ position:absolute; left:50%; width:1px; background:var(--ink); }
+  .flag.row0{ top:0; } .flag.row1{ top:30px; }
+  .flag.row0 .stem{ top:36px; height:44px; } .flag.row1 .stem{ top:36px; height:14px; }
+  .flag.best b{ color:var(--accent); }
+  .flag.best .stem{ background:var(--accent); width:2px; }
+  .flag.sel{ text-decoration:underline; text-underline-offset:3px; }
+  .tape{
+    position:absolute; left:0; right:0; top:80px; height:52px;
+    background:var(--tape); border-top:1px solid var(--tape-edge); border-bottom:1px solid var(--tape-edge);
+    border-radius:2px 8px 8px 2px; overflow:hidden;
+    box-shadow:inset 0 -6px 10px -8px rgba(0,0,0,.35);
+  }
+  .tape svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .tape .lbl{ position:absolute; top:24px; transform:translateX(-50%); font-family:'Archivo',sans-serif; font-weight:600; font-size:12px; color:var(--tape-ink); font-variant-numeric:tabular-nums; }
+  .zone{ position:absolute; top:0; bottom:0; background:repeating-linear-gradient(135deg,rgba(47,107,79,.55) 0 2px,transparent 2px 6px); border-left:2px solid #2F6B4F; border-right:2px solid #2F6B4F; }
+  .tol{ position:absolute; top:0; height:10px; background:rgba(42,36,24,.22); }
+  .you{ position:absolute; top:74px; height:84px; width:0; border-left:3px solid var(--accent); }
+  .you span{ position:absolute; top:84px; left:-1px; transform:translateX(-50%); font-size:12.5px; font-weight:600; color:var(--accent); white-space:nowrap; }
+  @media (prefers-reduced-motion:no-preference){
+    .you,.zone{ transition:left .35s ease, width .35s ease; }
+  }
+
+  /* garment detail */
+  .detail{ margin-top:22px; border-top:1px solid var(--line); padding-top:22px; display:grid; grid-template-columns:180px 1fr; gap:26px; align-items:start; }
+  @media (max-width:560px){ .detail{ grid-template-columns:1fr; } .detail svg.pants{ max-width:130px; margin:0 auto; } }
+  .sizes{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .sizes button{ min-width:48px; padding:9px 10px; border:1px solid var(--line); background:var(--bg); cursor:pointer; font-size:13px; font-weight:600; border-radius:2px; position:relative; }
+  .sizes button[aria-pressed="true"]{ background:var(--ink); color:var(--on-ink); border-color:var(--ink); }
+  .sizes button.best::after{ content:""; position:absolute; top:-4px; right:-4px; width:9px; height:9px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); }
+  .measure-list{ list-style:none; display:grid; gap:0; }
+  .measure-list li{ display:grid; grid-template-columns:76px 1fr auto; gap:12px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--line); font-size:14.5px; }
+  .measure-list .nm{ font-weight:600; }
+  .measure-list .note{ color:var(--ink-dim); }
+  .measure-list .val{ font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; }
+  .tag{ font-size:12px; font-weight:600; padding:2px 7px; border-radius:2px; margin-left:6px; }
+  .tag.ok{ background:var(--ok-soft); color:var(--ok); }
+  .tag.tight{ background:var(--accent-soft); color:var(--accent); }
+  .tag.loose{ background:var(--paper); color:var(--ink-dim); border:1px solid var(--line); }
+  svg.pants .p-line{ stroke:var(--ink); }
+  svg.pants .p-fill{ fill:var(--paper); stroke:var(--ink); }
+  svg.pants .d-line{ stroke-width:1.5; }
+  svg.pants text{ font-family:'Archivo',sans-serif; font-size:11px; font-weight:600; }
+
+  details.chart{ border-top:1px solid var(--line); }
+  details.chart summary{ padding:15px 22px; cursor:pointer; font-weight:600; font-size:14px; list-style:none; display:flex; justify-content:space-between; }
+  details.chart summary::-webkit-details-marker{ display:none; }
+  details.chart summary::after{ content:"+"; font-weight:400; font-size:18px; line-height:1; }
+  details.chart[open] summary::after{ content:"–"; }
+  .chart-inner{ padding:0 22px 22px; }
+  .chart-scroll{ overflow-x:auto; }
+  table.ct{ border-collapse:collapse; min-width:520px; width:100%; font-size:14px; }
+  table.ct th{ text-align:left; font-weight:600; font-size:13px; padding:8px 8px 8px 0; border-bottom:1px solid var(--line); }
+  table.ct td{ padding:6px 8px 6px 0; border-bottom:1px solid var(--line); }
+  table.ct input{ width:100%; min-width:64px; padding:7px 8px; border:1px solid var(--line); background:var(--bg); border-radius:2px; font-variant-numeric:tabular-nums; }
+  .x-btn{ border:0; background:none; cursor:pointer; color:var(--ink-dim); font-size:18px; padding:4px 8px; }
+  .chart-actions{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:14px; font-size:13.5px; color:var(--ink-dim); }
+  .chart-actions .btn{ padding:9px 14px; font-size:13px; }
+
+  /* sections */
+  section.block{ padding:88px 0; border-top:1px solid var(--line); }
+  .head{ max-width:640px; margin-bottom:44px; }
+  .head h2{ font-size:clamp(28px,3.8vw,42px); }
+  .head p{ margin-top:14px; color:var(--ink-dim); font-size:16px; }
+
+  .why{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .why > div{ background:var(--bg); padding:28px 24px; }
+  .why h3{ font-size:19px; font-family:'Archivo',sans-serif; font-weight:700; }
+  .why p{ margin-top:8px; color:var(--ink-dim); font-size:14.5px; }
+  .why .fig{ font-family:'Archivo',sans-serif; font-stretch:125%; font-weight:800; font-size:38px; color:var(--accent); line-height:1; margin-bottom:14px; }
+  @media (max-width:780px){ .why{ grid-template-columns:1fr; } }
+
+  .seller{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+  .seller ol{ list-style:none; counter-reset:s; margin-top:8px; }
+  .seller ol li{ counter-increment:s; display:grid; grid-template-columns:34px 1fr; padding:16px 0; border-bottom:1px solid var(--line); }
+  .seller ol li::before{ content:counter(s); font-family:'Archivo',sans-serif; font-weight:700; color:var(--accent); }
+  .seller ol strong{ display:block; }
+  .seller ol span{ color:var(--ink-dim); font-size:14.5px; }
+  .listing{ border:1px solid var(--line); background:var(--paper); padding:26px; }
+  .listing .row{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .listing h3{ font-size:22px; }
+  .listing .price{ color:var(--accent); font-weight:600; }
+  .listing .meta{ color:var(--ink-dim); font-size:14px; margin-top:4px; }
+  .listing .fitline{ margin-top:18px; padding:14px 16px; background:var(--bg); border:1px solid var(--line); border-left:3px solid var(--ok); font-size:14.5px; }
+  .listing .fitline b{ font-weight:600; }
+  .listing .dims{ margin-top:14px; display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); background:var(--bg); }
+  .listing .dims div{ padding:12px; border-right:1px solid var(--line); font-size:13px; color:var(--ink-dim); }
+  .listing .dims div:last-child{ border-right:0; }
+  .listing .dims b{ display:block; font-family:'Archivo',sans-serif; font-size:20px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  @media (max-width:860px){ .seller{ grid-template-columns:1fr; gap:32px; } }
+
+  .places{ display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); }
+  .places > div{ padding:28px 24px; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:10px; }
+  .places > div:last-child{ border-right:0; }
+  .places .status{ font-size:12.5px; font-weight:600; align-self:flex-start; padding:3px 8px; border-radius:2px; }
+  .status.now{ background:var(--ok-soft); color:var(--ok); }
+  .status.next{ background:var(--accent-soft); color:var(--accent); }
+  .status.talk{ background:var(--paper); color:var(--ink-dim); border:1px solid var(--line); }
+  .places h3{ font-family:'Archivo',sans-serif; font-size:20px; }
+  .places p{ color:var(--ink-dim); font-size:14.5px; }
+  pre.snip{ margin-top:6px; background:var(--paper); border:1px solid var(--line); padding:12px; font-size:12px; overflow-x:auto; line-height:1.5; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  @media (max-width:860px){ .places{ grid-template-columns:1fr; } .places > div{ border-right:0; border-bottom:1px solid var(--line); } .places > div:last-child{ border-bottom:0; } }
+
+  .signup{ background:var(--paper); }
+  .panel{ display:grid; grid-template-columns:1fr 1fr; background:var(--bg); border:1px solid var(--line); }
+  .panel > div{ padding:44px; }
+  .panel > div + div{ border-left:1px solid var(--line); }
+  .panel h2{ font-size:clamp(26px,3.4vw,36px); }
+  .panel p{ margin-top:12px; color:var(--ink-dim); max-width:40ch; }
+  form.su{ display:flex; flex-direction:column; gap:14px; margin-top:18px; }
+  form.su input{ width:100%; padding:12px 13px; border:1px solid var(--line); background:var(--bg); border-radius:2px; }
+  form.su input:focus{ border-color:var(--ink); outline:none; }
+  form.su label{ font-size:13px; font-weight:600; display:block; margin-bottom:6px; }
+  .done{ display:none; border:1px solid var(--ok); color:var(--ok); padding:16px; margin-top:18px; font-size:14.5px; }
+  @media (max-width:820px){ .panel{ grid-template-columns:1fr; } .panel > div{ padding:30px 22px; } .panel > div + div{ border-left:0; border-top:1px solid var(--line); } }
+
+  footer{ border-top:1px solid var(--line); padding:34px 0 44px; font-size:13px; color:var(--ink-dim); }
+  footer .wrap{ display:flex; flex-wrap:wrap; gap:14px 28px; justify-content:space-between; }
+  footer .src{ width:100%; border-top:1px solid var(--line); padding-top:14px; font-size:12px; }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a href="index.html" class="wordmark">Cladi<small>Fit</small></a>
+    <div class="nav-links">
+      <a href="cladi-app.html" class="keep">Shop</a>
+      <a href="#check">Check a fit</a>
+      <a href="#sellers">For sellers</a>
+      <a href="#stores">For stores</a>
+      <a href="#join" class="keep">Early access</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <h1 class="display">Your waist is <span class="num" id="h-you">33</span>. The chart says <span class="num" id="h-a">32.3</span> or <span class="num" id="h-b">34.3</span>. Now what?</h1>
+    <p class="lede">Size letters don’t fit people. Measurements do. <strong>Cladi Fit</strong> puts your body next to the garment, tells you which size to order, and how it’ll feel when it arrives.</p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <section class="tool" id="check" aria-label="Fit checker">
+    <div class="tool-head">
+      <div class="item-name" id="item-name">Brown flared suit trousers <span>· no stretch · regular fit</span></div>
+      <div class="seg" role="group" aria-label="Units">
+        <button type="button" id="u-in" aria-pressed="true">inches</button>
+        <button type="button" id="u-cm" aria-pressed="false">cm</button>
+      </div>
+    </div>
+
+    <div class="tool-body">
+      <div class="inputs">
+        <div class="field">
+          <label for="w-num">Your waist <span class="hint">where you wear trousers</span></label>
+          <div class="num-row">
+            <input type="range" id="w-range" min="24" max="48" step="0.1" aria-label="Waist slider">
+            <input type="number" class="num-in" id="w-num" step="0.1" inputmode="decimal">
+          </div>
+        </div>
+        <div class="pair">
+          <div class="field">
+            <label for="h-num">Hips <span class="hint">optional</span></label>
+            <input type="number" class="num-in" id="h-num" step="0.1" inputmode="decimal" placeholder="—">
+          </div>
+          <div class="field">
+            <label for="i-num">Inseam <span class="hint">optional</span></label>
+            <input type="number" class="num-in" id="i-num" step="0.1" inputmode="decimal" placeholder="—">
+          </div>
+        </div>
+        <div class="field">
+          <span class="lab">How you like it</span>
+          <div class="choice" id="fit-choice">
+            <button type="button" data-v="snug">Snug</button>
+            <button type="button" data-v="regular">Regular</button>
+            <button type="button" data-v="relaxed">Relaxed</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="lab">Fabric stretch <span class="hint">from the listing</span></span>
+          <div class="choice" id="stretch-choice">
+            <button type="button" data-v="none">None</button>
+            <button type="button" data-v="slight">Slight</button>
+            <button type="button" data-v="medium">Medium</button>
+            <button type="button" data-v="high">High</button>
+          </div>
+        </div>
+        <p class="saved" id="saved">Your measurements stay on this device.</p>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="verdict">
+          <div class="big" id="v-size">L</div>
+          <div>
+            <h2 class="display" id="v-title">Order the L.</h2>
+            <p id="v-body"></p>
+          </div>
+        </div>
+
+        <div class="tape-block">
+          <div class="tape-caption">
+            <span>Garment waist for each size, against yours</span>
+            <span><span class="key"><i class="k-zone"></i>Comfortable room</span><span class="key"><i class="k-you"></i>You</span></span>
+          </div>
+          <div class="tape-stage" id="stage">
+            <div class="tape" id="tape"></div>
+          </div>
+        </div>
+
+        <div class="detail">
+          <svg class="pants" viewBox="0 0 180 300" aria-hidden="true">
+            <path class="p-fill" stroke-width="1.5" d="M48 30 L132 30 L136 120 L162 286 L104 286 L92 128 L88 128 L76 286 L18 286 L44 120 Z"/>
+            <rect class="p-fill" x="46" y="22" width="88" height="12" stroke-width="1.5"/>
+            <line class="p-line" x1="90" y1="34" x2="90" y2="90" stroke-width="1"/>
+            <g id="d-waist"><line class="d-line" x1="46" y1="12" x2="134" y2="12"/><line class="d-line" x1="46" y1="7" x2="46" y2="17"/><line class="d-line" x1="134" y1="7" x2="134" y2="17"/></g>
+            <g id="d-hip"><line class="d-line" x1="43" y1="98" x2="137" y2="98" stroke-dasharray="3 3"/></g>
+            <g id="d-inseam"><line class="d-line" x1="98" y1="134" x2="112" y2="282" stroke-dasharray="3 3"/></g>
+          </svg>
+          <div>
+            <div class="sizes" id="sizes" role="group" aria-label="Inspect a size"></div>
+            <ul class="measure-list" id="mlist"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <details class="chart" id="chart-details">
+      <summary>Paste in your own size chart</summary>
+      <div class="chart-inner">
+        <div class="chart-scroll">
+          <table class="ct">
+            <thead><tr><th>Size</th><th>Waist</th><th>Hips</th><th>Inseam</th><th></th></tr></thead>
+            <tbody id="ct-body"></tbody>
+          </table>
+        </div>
+        <div class="chart-actions">
+          <button type="button" class="btn ghost" id="add-row">Add a size</button>
+          <label>± tolerance <input type="number" class="num-in" id="tol" step="0.1" style="width:72px"></label>
+          <span>Use the <em>product</em> chart (the garment measured flat), not the body chart.</span>
+        </div>
+      </div>
+    </details>
+  </section>
+</div>
+
+<section class="block" id="why">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="display">Why “between sizes” happens.</h2>
+      <p>The chart isn’t lying, it’s just answering a different question. It tells you what the garment measures, not what your body needs.</p>
+    </div>
+    <div class="why">
+      <div>
+        <div class="fig">+1 in</div>
+        <h3>Fabric needs room</h3>
+        <p>A non-stretch waistband should measure a little more than your body, about one finger to two. A garment that matches your waist exactly is a size that fights you all day.</p>
+      </div>
+      <div>
+        <div class="fig">±0.8</div>
+        <h3>Charts have slack</h3>
+        <p>Sellers measure by hand, so each piece can be off by half an inch or more. Cladi Fit shows that wobble on the tape so you can see when a size is too close to call.</p>
+      </div>
+      <div>
+        <div class="fig">53%</div>
+        <h3>Fit is why clothes go back</h3>
+        <p>Apparel retailers name size and fit as the top reason for returns. For a buyer in Nairobi, a wrong size from abroad doesn’t get returned. It gets given away.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="sellers">
+  <div class="wrap seller">
+    <div>
+      <div class="head" style="margin-bottom:18px">
+        <h2 class="display">Thrift has no size chart. So we make one per piece.</h2>
+        <p>A Gikomba jacket might carry a UK label, an old shrink, and a tailor’s fix. On Cladi, sellers measure the actual item once, and every buyer sees how it fits them.</p>
+      </div>
+      <ol>
+        <li><div><strong>Lay it flat, measure three lines</strong><span>Waist, hips and inseam for trousers. Chest, length and sleeve for tops. A tape and thirty seconds.</span></div></li>
+        <li><div><strong>Cladi doubles and checks them</strong><span>Flat widths become full measurements, and numbers that look off get flagged before the listing goes live.</span></div></li>
+        <li><div><strong>Buyers see their own fit line</strong><span>Anyone with a saved fit card sees “fits you” or “tight at the hips” right on the listing.</span></div></li>
+      </ol>
+    </div>
+    <div class="listing" aria-label="Example listing">
+      <div class="row"><h3 class="display">Wool pleated trousers</h3><span class="price">KES 1,400</span></div>
+      <div class="meta">Label says 34 · measured by the seller</div>
+      <div class="dims">
+        <div><b>34.6</b>waist, in</div>
+        <div><b>43.0</b>hips, in</div>
+        <div><b>31.5</b>inseam, in</div>
+      </div>
+      <div class="fitline" id="listing-fit"><b>Fits you.</b> About 1.6 in of room at the waist.</div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="stores">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="display">One fit card, wherever you shop.</h2>
+      <p>Save your measurements once. Cladi Fit is built to work in three places, starting with our own marketplace.</p>
+    </div>
+    <div class="places">
+      <div>
+        <span class="status now">Building now</span>
+        <h3>On Cladi listings</h3>
+        <p>Every thrift item carries its own measurements, so the fit line is exact for that one piece rather than a guess across a size range.</p>
+        <a href="cladi-app.html" class="btn ghost" style="align-self:flex-start;margin-top:6px">Try it on the rack</a>
+      </div>
+      <div>
+        <span class="status next">Next</span>
+        <h3>A browser extension</h3>
+        <p>Open a product page on a desktop browser and Cladi Fit reads the size chart, then tells you which size to pick before you add it to your cart.</p>
+      </div>
+      <div>
+        <span class="status talk">Talking to stores</span>
+        <h3>A widget for shops</h3>
+        <p>Online stores add one line to their product page. Shoppers get a size answer, and the store sends fewer parcels back and forth.</p>
+<pre class="snip">&lt;script src="cladi.fit/w.js"
+  data-chart="#size-table"&gt;&lt;/script&gt;</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block signup" id="join">
+  <div class="wrap">
+    <div class="panel">
+      <div>
+        <h2 class="display">Stop guessing between two sizes.</h2>
+        <p>We’re opening Cladi Fit to a small group of Nairobi shoppers, thrift sellers and online stores first. Tell us which you are.</p>
+      </div>
+      <div>
+        <div class="seg" role="group" aria-label="I am a">
+          <button type="button" data-role="Shopper" aria-pressed="true">Shopper</button>
+          <button type="button" data-role="Seller" aria-pressed="false">Seller</button>
+          <button type="button" data-role="Store" aria-pressed="false">Store</button>
+        </div>
+        <form class="su" id="su">
+          <div><label for="nm">Name</label><input id="nm" required placeholder="Your name" autocomplete="name"></div>
+          <div><label for="ph">Phone number</label><input id="ph" type="tel" required placeholder="07xx xxx xxx" autocomplete="tel"></div>
+          <div id="store-f" hidden><label for="st">Store website</label><input id="st" placeholder="yourstore.co.ke"></div>
+          <button type="submit" class="btn">Join the early list</button>
+        </form>
+        <div class="done" id="done">You’re on the list. We’ll text you when your spot opens.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="index.html" class="wordmark" style="font-size:15px">Cladi</a>
+    <span style="display:flex;gap:18px;flex-wrap:wrap"><a href="cladi-app.html">Shop</a><a href="cladi-app.html#me">My fit card</a><a href="index.html">About</a><span>Built in Nairobi.</span></span>
+    <p class="src">Return figure: Coresight Research survey of US apparel retailers (2023), where 53% named size and fit as the top return reason. Example trousers chart taken from a public product page, used for illustration. Fit advice is guidance based on the measurements you enter.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const CM = 2.54;
+  const $ = id => document.getElementById(id);
+
+  // ---- state (inches internally) ----
+  const state = {
+    unit:'in', waist:33, hips:null, inseam:null, fit:'regular', stretch:'none', tol:0.8,
+    sel:null,
+    chart:[
+      {size:'S',  waist:30.7, hips:40.9, inseam:30.4},
+      {size:'M',  waist:32.3, hips:42.5, inseam:30.7},
+      {size:'L',  waist:34.3, hips:44.5, inseam:31.0},
+      {size:'XL', waist:36.2, hips:46.5, inseam:31.3},
+      {size:'XXL',waist:38.2, hips:48.4, inseam:31.7},
+    ]
+  };
+  try{
+    const card = JSON.parse(localStorage.getItem('cladi-fitcard-v1') || 'null');
+    if(card && card.waist){ state.waist = card.waist/2.54; if(card.hips) state.hips = card.hips/2.54; if(card.inseam) state.inseam = card.inseam/2.54; if(card.pref) state.fit = card.pref; }
+  }catch(e){}
+  try{
+    const s = JSON.parse(localStorage.getItem('cladi-fit-card') || 'null');
+    if(s){ ['unit','waist','hips','inseam','fit'].forEach(k => { if(s[k] !== undefined) state[k] = s[k]; }); }
+  }catch(e){}
+
+  const save = () => {
+    try{
+      localStorage.setItem('cladi-fit-card', JSON.stringify({unit:state.unit, waist:state.waist, hips:state.hips, inseam:state.inseam, fit:state.fit}));
+      $('saved').textContent = 'Fit card saved on this device.';
+    }catch(e){ $('saved').textContent = 'Your measurements stay on this page.'; }
+  };
+
+  // ease ranges (garment minus body), inches
+  const WAIST = { snug:[0.25,0.75], regular:[0.5,1.6], relaxed:[1.0,2.6] };
+  const HIPS  = { snug:[1.0,2.5],  regular:[2.0,5.0], relaxed:[3.5,8.0] };
+  const STRETCH = { none:0, slight:0.4, medium:0.9, high:1.6 };
+  const STRETCH_LABEL = { none:'no stretch', slight:'slight stretch', medium:'medium stretch', high:'high stretch' };
+
+  const toU = v => state.unit === 'cm' ? v*CM : v;
+  const fromU = v => state.unit === 'cm' ? v/CM : v;
+  const fmt = v => (state.unit === 'cm' ? Math.round(v*CM) : (Math.round(v*10)/10)).toString();
+  const fmtD = v => { const x = state.unit==='cm' ? Math.round(Math.abs(v)*CM*10)/10 : Math.round(Math.abs(v)*10)/10; return x.toString(); };
+  const U = () => state.unit === 'cm' ? 'cm' : 'in';
+
+  const range = (base, fit) => { const r = base[fit]; return [r[0] - STRETCH[state.stretch], r[1]]; };
+  const pen = (ease, [lo,hi]) => ease < lo ? (lo-ease)*4 : ease > hi ? (ease-hi) : 0;
+  const status = (ease, [lo,hi]) => ease < lo ? 'tight' : ease > hi ? 'loose' : 'ok';
+
+  function evaluate(){
+    const wr = range(WAIST, state.fit), hr = range(HIPS, state.fit);
+    return state.chart.filter(r => isFinite(r.waist)).map(r => {
+      const we = r.waist - state.waist;
+      let score = pen(we, wr)*3;
+      let he = null;
+      if(state.hips && isFinite(r.hips)){ he = r.hips - state.hips; score += pen(he, hr)*2; }
+      return {...r, we, he, score};
+    });
+  }
+
+  function fingers(e){
+    const f = Math.round(e/0.75);
+    if(f <= 0) return 'barely a finger';
+    if(f === 1) return 'about one finger';
+    if(f === 2) return 'about two fingers';
+    return `about ${f} fingers`;
+  }
+
+  function render(){
+    const rows = evaluate();
+    if(!rows.length){ $('v-size').textContent='?'; $('v-title').textContent='Add a size chart.'; $('v-body').textContent='Enter at least one size with a waist measurement.'; return; }
+    const best = rows.reduce((a,b) => b.score < a.score ? b : a);
+    if(!state.sel || !rows.find(r => r.size === state.sel)) state.sel = best.size;
+    const wr = range(WAIST, state.fit);
+    const sorted = [...rows].sort((a,b) => a.waist - b.waist);
+    const idx = sorted.findIndex(r => r.size === best.size);
+    const smaller = sorted[idx-1], bigger = sorted[idx+1];
+
+    // hero numbers: the two sizes that straddle the waist
+    let lo = null, hi = null;
+    sorted.forEach(r => { if(r.waist <= state.waist) lo = r; if(r.waist > state.waist && !hi) hi = r; });
+    $('h-you').textContent = fmt(state.waist);
+    $('h-a').textContent = lo ? fmt(lo.waist) : fmt(sorted[0].waist);
+    $('h-b').textContent = hi ? fmt(hi.waist) : fmt(sorted[sorted.length-1].waist);
+
+    // verdict
+    const ws = status(best.we, wr);
+    $('v-size').textContent = best.size;
+    let title, body = '';
+    if(ws === 'ok'){
+      title = `Order the ${best.size}.`;
+      body = `You’ll have <strong>${fmtD(best.we)} ${U()} of room</strong> at the waist, ${fingers(best.we)}. `;
+    } else if(ws === 'tight'){
+      title = `The ${best.size} is your closest, but it’s tight.`;
+      body = best.we < 0 ? `It measures <strong>${fmtD(best.we)} ${U()} less than your waist</strong>. ` : `It leaves only <strong>${fmtD(best.we)} ${U()}</strong> at the waist. `;
+    } else {
+      title = `Order the ${best.size}, and bring a belt.`;
+      body = `It runs <strong>${fmtD(best.we)} ${U()} bigger</strong> than your waist, so expect some gathering. `;
+    }
+    if(smaller && ws !== 'tight'){
+      const sw = smaller.we;
+      if(sw < 0){
+        const maxPossible = sw + state.tol;
+        body += `The ${smaller.size} is ${fmtD(sw)} ${U()} smaller than you` + (state.stretch === 'none' ? ', and this fabric doesn’t give' : '') + (maxPossible < wr[0] ? `. Even if the seller measured short, it tops out near ${fmt(smaller.waist + state.tol)} ${U()}.` : '.');
+      } else {
+        body += `The ${smaller.size} would leave just ${fmtD(sw)} ${U()}, too close for ${STRETCH_LABEL[state.stretch]} fabric.`;
+      }
+    } else if(bigger && ws === 'tight'){
+      body += `The ${bigger.size} gives ${fmtD(bigger.we)} ${U()}; if you’re between, size up and take in the waist.`;
+    }
+    if(best.he !== null){
+      const hs = status(best.he, range(HIPS, state.fit));
+      if(hs === 'tight') body += ` Watch the seat: the hips are tight in this size.`;
+    } else {
+      body += ` Add your hips to check the seat too.`;
+    }
+    $('v-title').textContent = title;
+    $('v-body').innerHTML = body;
+    $('item-name').innerHTML = `Brown flared suit trousers <span>· ${STRETCH_LABEL[state.stretch]} · ${state.fit} fit</span>`;
+
+    renderTape(sorted, best, wr);
+    renderSizes(rows, best);
+    renderDetail(rows.find(r => r.size === state.sel));
+    renderListing();
+  }
+
+  function renderTape(sorted, best, wr){
+    const tape = $('tape'), stage = $('stage');
+    stage.querySelectorAll('.flag,.you').forEach(n => n.remove());
+    const vals = sorted.map(r => r.waist).concat([state.waist, state.waist + wr[1]]);
+    let min = Math.floor(Math.min(...vals) - 1.5), max = Math.ceil(Math.max(...vals) + 1.5);
+    const pos = v => ((v - min) / (max - min)) * 100;
+
+    // ticks
+    const small = state.unit === 'cm' ? 1/CM : 0.25;
+    const labelEvery = state.unit === 'cm' ? 5 : 1;
+    let svg = `<svg viewBox="0 0 1000 52" preserveAspectRatio="none" aria-hidden="true">`;
+    let labels = '';
+    const startU = Math.ceil(toU(min)/ (state.unit==='cm'?1:0.25)) * (state.unit==='cm'?1:0.25);
+    for(let u = startU; u <= toU(max) + 1e-6; u += (state.unit==='cm'?1:0.25)){
+      const inch = fromU(u);
+      const x = pos(inch) * 10;
+      const isLabel = Math.abs(u/labelEvery - Math.round(u/labelEvery)) < 1e-6;
+      const isHalf = state.unit==='cm' ? false : Math.abs(u*2 - Math.round(u*2)) < 1e-6;
+      const h = isLabel ? 20 : isHalf ? 13 : 8;
+      svg += `<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="#2A2418" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+      if(isLabel && pos(inch) > 3 && pos(inch) < 97) labels += `<span class="lbl" style="left:${pos(inch)}%">${Math.round(u)}</span>`;
+    }
+    svg += `</svg>`;
+    const zoneL = pos(state.waist + wr[0]), zoneR = pos(state.waist + wr[1]);
+    let tols = sorted.map(r => `<div class="tol" style="left:${pos(r.waist - state.tol)}%;width:${pos(r.waist + state.tol) - pos(r.waist - state.tol)}%"></div>`).join('');
+    tape.innerHTML = `<div class="zone" style="left:${zoneL}%;width:${zoneR - zoneL}%"></div>` + tols + svg + labels;
+
+    sorted.forEach((r,i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = `flag row${i%2}` + (r.size === best.size ? ' best' : '') + (r.size === state.sel ? ' sel' : '');
+      b.style.left = pos(r.waist) + '%';
+      b.innerHTML = `<b>${r.size}</b>${fmt(r.waist)}<span class="stem"></span>`;
+      b.setAttribute('aria-label', `Size ${r.size}, waist ${fmt(r.waist)} ${U()}`);
+      b.onclick = () => { state.sel = r.size; render(); };
+      stage.appendChild(b);
+    });
+    const you = document.createElement('div');
+    you.className = 'you';
+    you.style.left = pos(state.waist) + '%';
+    you.innerHTML = `<span>You · ${fmt(state.waist)}</span>`;
+    stage.appendChild(you);
+  }
+
+  function renderSizes(rows, best){
+    $('sizes').innerHTML = '';
+    rows.forEach(r => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = r.size;
+      b.className = r.size === best.size ? 'best' : '';
+      b.setAttribute('aria-pressed', r.size === state.sel);
+      if(r.size === best.size) b.setAttribute('aria-label', `${r.size}, best fit`);
+      b.onclick = () => { state.sel = r.size; render(); };
+      $('sizes').appendChild(b);
+    });
+  }
+
+  const COLOR = { ok:'var(--ok)', tight:'var(--accent)', loose:'var(--ink-dim)', none:'var(--ink-dim)' };
+  const TAG = { ok:'Comfortable', tight:'Tight', loose:'Loose' };
+
+  function renderDetail(r){
+    const wr = range(WAIST, state.fit), hr = range(HIPS, state.fit);
+    const items = [];
+    const ws = status(r.we, wr);
+    items.push({id:'d-waist', nm:'Waist', val:`${fmt(r.waist)} ${U()}`, st:ws,
+      note: r.we >= 0 ? `${fmtD(r.we)} ${U()} more than you` : `${fmtD(r.we)} ${U()} less than you`});
+    let hs = 'none';
+    if(isFinite(r.hips)){
+      if(state.hips){ hs = status(r.he, hr); items.push({id:'d-hip', nm:'Hips', val:`${fmt(r.hips)} ${U()}`, st:hs, note: r.he >= 0 ? `${fmtD(r.he)} ${U()} more than you` : `${fmtD(r.he)} ${U()} less than you`}); }
+      else items.push({id:'d-hip', nm:'Hips', val:`${fmt(r.hips)} ${U()}`, st:'none', note:'Add your hips to compare'});
+    }
+    let is = 'none';
+    if(isFinite(r.inseam)){
+      if(state.inseam){
+        const d = r.inseam - state.inseam;
+        let note, st;
+        if(d < -0.5){ note = `${fmtD(d)} ${U()} short of your inseam`; st='tight'; }
+        else if(d > 1.5){ note = `${fmtD(d)} ${U()} long, needs a hem`; st='loose'; }
+        else { note = 'Right length for a flare to the shoe'; st='ok'; }
+        is = st; items.push({id:'d-inseam', nm:'Inseam', val:`${fmt(r.inseam)} ${U()}`, st, note});
+      } else items.push({id:'d-inseam', nm:'Inseam', val:`${fmt(r.inseam)} ${U()}`, st:'none', note:'Add your inseam to check length'});
+    }
+    $('mlist').innerHTML = items.map(it => `<li><span class="nm">${it.nm}</span><span class="note">${it.note}${it.st !== 'none' ? `<span class="tag ${it.st}">${TAG[it.st]}</span>` : ''}</span><span class="val">${it.val}</span></li>`).join('');
+    const map = {'d-waist':ws, 'd-hip':hs, 'd-inseam':is};
+    Object.entries(map).forEach(([id, st]) => {
+      const g = $(id); if(!g) return;
+      g.querySelectorAll('line').forEach(l => l.setAttribute('stroke', COLOR[st]));
+      g.style.opacity = st === 'none' ? .45 : 1;
+    });
+  }
+
+  function renderListing(){
+    // example listing: a 34.6 in waist thrift piece
+    const e = 34.6 - state.waist, wr = range(WAIST, state.fit);
+    const s = status(e, [wr[0] + STRETCH[state.stretch], wr[1]]); // wool, no stretch
+    const el = $('listing-fit');
+    if(s === 'ok') el.innerHTML = `<b>Fits you.</b> About ${fmtD(e)} ${U()} of room at the waist.`;
+    else if(s === 'tight') el.innerHTML = e < 0 ? `<b>Too small for you.</b> ${fmtD(e)} ${U()} under your waist.` : `<b>Snug on you.</b> Only ${fmtD(e)} ${U()} of room.`;
+    else el.innerHTML = `<b>Roomy on you.</b> ${fmtD(e)} ${U()} extra at the waist, belt it.`;
+    el.style.borderLeftColor = s === 'ok' ? 'var(--ok)' : s === 'tight' ? 'var(--accent)' : 'var(--ink-dim)';
+  }
+
+  // ---- chart editor ----
+  function renderChart(){
+    const tb = $('ct-body');
+    tb.innerHTML = '';
+    state.chart.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      const cell = (k, isText) => {
+        const td = document.createElement('td');
+        const inp = document.createElement('input');
+        inp.type = isText ? 'text' : 'number'; if(!isText){ inp.step = '0.1'; inp.inputMode = 'decimal'; }
+        inp.value = isText ? r[k] : (isFinite(r[k]) ? fmt(r[k]) : '');
+        inp.setAttribute('aria-label', `${k} for row ${i+1}`);
+        inp.oninput = () => {
+          if(isText) r[k] = inp.value.trim() || `#${i+1}`;
+          else { const v = parseFloat(inp.value); r[k] = isFinite(v) ? fromU(v) : NaN; }
+          render();
+        };
+        td.appendChild(inp); return td;
+      };
+      tr.append(cell('size', true), cell('waist'), cell('hips'), cell('inseam'));
+      const td = document.createElement('td');
+      const x = document.createElement('button'); x.type='button'; x.className='x-btn'; x.textContent='×'; x.setAttribute('aria-label', `Remove size ${r.size}`);
+      x.onclick = () => { state.chart.splice(i,1); renderChart(); render(); };
+      td.appendChild(x); tr.appendChild(td); tb.appendChild(tr);
+    });
+    $('tol').value = fmt(state.tol);
+  }
+  $('add-row').onclick = () => {
+    const last = state.chart[state.chart.length-1] || {waist:32, hips:42, inseam:31};
+    state.chart.push({size:'New', waist:last.waist+2, hips:last.hips+2, inseam:last.inseam+0.3});
+    renderChart(); render();
+  };
+  $('tol').oninput = e => { const v = parseFloat(e.target.value); if(isFinite(v)) { state.tol = fromU(v); render(); } };
+
+  // ---- inputs ----
+  function syncInputs(){
+    const r = $('w-range');
+    r.min = toU(24).toFixed(state.unit==='cm'?0:1); r.max = toU(48).toFixed(state.unit==='cm'?0:1); r.step = state.unit==='cm' ? 0.5 : 0.1;
+    r.value = toU(state.waist);
+    $('w-num').value = fmt(state.waist);
+    $('h-num').value = state.hips ? fmt(state.hips) : '';
+    $('i-num').value = state.inseam ? fmt(state.inseam) : '';
+    $('u-in').setAttribute('aria-pressed', state.unit === 'in');
+    $('u-cm').setAttribute('aria-pressed', state.unit === 'cm');
+    document.querySelectorAll('#fit-choice button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === state.fit));
+    document.querySelectorAll('#stretch-choice button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === state.stretch));
+  }
+  $('w-range').oninput = e => { state.waist = fromU(parseFloat(e.target.value)); $('w-num').value = fmt(state.waist); render(); save(); };
+  $('w-num').oninput = e => { const v = parseFloat(e.target.value); if(isFinite(v) && fromU(v) > 15 && fromU(v) < 70){ state.waist = fromU(v); $('w-range').value = v; render(); save(); } };
+  $('h-num').oninput = e => { const v = parseFloat(e.target.value); state.hips = isFinite(v) && fromU(v) > 20 ? fromU(v) : null; render(); save(); };
+  $('i-num').oninput = e => { const v = parseFloat(e.target.value); state.inseam = isFinite(v) && fromU(v) > 18 ? fromU(v) : null; render(); save(); };
+  document.querySelectorAll('#fit-choice button').forEach(b => b.onclick = () => { state.fit = b.dataset.v; syncInputs(); render(); save(); });
+  document.querySelectorAll('#stretch-choice button').forEach(b => b.onclick = () => { state.stretch = b.dataset.v; syncInputs(); render(); });
+  $('u-in').onclick = () => { state.unit = 'in'; syncInputs(); renderChart(); render(); save(); };
+  $('u-cm').onclick = () => { state.unit = 'cm'; syncInputs(); renderChart(); render(); save(); };
+
+  // ---- signup ----
+  let role = 'Shopper';
+  document.querySelectorAll('[data-role]').forEach(b => b.onclick = () => {
+    role = b.dataset.role;
+    document.querySelectorAll('[data-role]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    $('store-f').hidden = role !== 'Store';
+  });
+  // Replace with your Google Form endpoint + entry IDs when you host this yourself.
+  const GOOGLE_FORM_ACTION_URL = '';
+  $('su').onsubmit = e => {
+    e.preventDefault();
+    if(GOOGLE_FORM_ACTION_URL){
+      const d = new FormData();
+      d.append('entry.111111111', $('nm').value); d.append('entry.222222222', $('ph').value);
+      d.append('entry.333333333', role); d.append('entry.444444444', $('st').value || '');
+      fetch(GOOGLE_FORM_ACTION_URL, {method:'POST', mode:'no-cors', body:d}).catch(() => {});
+    }
+    e.target.style.display = 'none';
+    $('done').style.display = 'block';
+  };
+
+  syncInputs(); renderChart(); render();
+})();
+</script>
+</body>
+</html>
