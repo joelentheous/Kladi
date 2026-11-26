@@ -102,7 +102,11 @@
   .nav-cta{
     display:none;
   }
+  .nav-links{ display:flex; gap:16px; white-space:nowrap; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; }
+  .nav-links a.desk{ display:none; }
+  .nav-links a.site{ color:var(--accent); }
   @media (min-width:860px){
+    .nav-links a.desk{ display:inline; }
     .nav-icon-group.left{ gap:28px; }
     .nav-links{
       display:flex; gap:28px;
@@ -362,11 +366,12 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </span>
       <div class="nav-links">
-        <a href="#how">How it works</a>
-        <a href="#finds">The finds</a>
+        <a href="cladi-app.html" class="site">Shop</a>
+        <a href="cladi-fit.html" class="site desk">Fit check</a>
+        <a href="#how" class="desk">How it works</a>
       </div>
     </div>
-    <div class="wordmark">Cladi</div>
+    <a href="index.html" class="wordmark">Cladi</a>
     <div class="nav-icon-group right">
       <span class="icon-btn" aria-label="Search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -388,8 +393,8 @@
       <span class="eyebrow">Nairobi · Gikomba · Think Twice</span>
       <h1 class="display">Gikomba's best finds, without the digging.</h1>
       <div class="cta-row">
-        <a href="#join" class="btn btn-solid-light">Get early access</a>
-        <a href="#how" class="btn btn-outline-light">See how it works</a>
+        <a href="cladi-app.html" class="btn btn-solid-light">Shop by what fits you</a>
+        <a href="#join" class="btn btn-outline-light">Get early access</a>
       </div>
     </div>
   </div>
@@ -430,7 +435,7 @@
           <button>L</button>
           <button>XL</button>
         </div>
-        <a href="#join" class="btn btn-solid-dark">Get early access</a>
+        <a href="cladi-app.html" class="btn btn-solid-dark">See if it fits you</a>
         <p class="fee-note">This listing is a preview — Cladi isn't open for checkout yet. Join the list below to shop it first.</p>
       </div>
     </div>
@@ -539,8 +544,9 @@
   <div class="wrap">
     <div class="wordmark display">Cladi</div>
     <div class="foot-links">
-      <a href="#how">How it works</a>
-      <a href="#finds">The finds</a>
+      <a href="cladi-app.html">Shop</a>
+      <a href="cladi-app.html#me">My fit card</a>
+      <a href="cladi-fit.html">Fit check</a>
       <a href="#join">Early access</a>
     </div>
     <div class="credit">© 2026 Cladi. Built in Nairobi. Photography via Pexels (free-to-use, placeholder) — swap for real Cladi listing photos before public launch.</div>

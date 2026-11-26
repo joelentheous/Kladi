@@ -47,7 +47,9 @@
   .chip.on{ border-color:var(--ok); color:var(--ok); background:var(--ok-soft); }
   .bag{ position:relative; width:22px; height:22px; display:inline-flex; }
   .bag b{ position:absolute; top:-6px; right:-9px; background:var(--accent); color:#fff; font-size:10px; min-width:16px; height:16px; border-radius:8px; display:grid; place-items:center; padding:0 4px; }
-  @media (max-width:560px){ .nl{ gap:14px; } .chip .long{ display:none; } }
+  @media (max-width:560px){ .nl{ gap:14px; } .nl .about{ display:none; } .chip .long{ display:none; } }
+  footer nav{ display:flex; gap:18px; flex-wrap:wrap; }
+  footer nav a{ color:var(--ink); font-weight:500; }
 
   .btn{ font-family:'Archivo',sans-serif; font-size:14px; font-weight:600; padding:13px 22px; border:1px solid var(--ink); background:var(--ink); color:#fff; border-radius:2px; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
   .btn.ghost{ background:transparent; color:var(--ink); }
@@ -193,6 +195,7 @@
     <div class="nl">
       <a href="#shop" data-nav="shop">Shop</a>
       <a href="#me" data-nav="me">My fit</a>
+      <a href="index.html" class="about">About</a>
     </div>
     <a href="#shop" class="wordmark">Cladi</a>
     <div class="nr">
@@ -316,7 +319,7 @@
   </section>
 </main>
 
-<footer><div class="wrap"><span>© 2026 Cladi. Built in Nairobi.</span><span>Fit advice is a guide based on your measurements and the seller’s.</span></div></footer>
+<footer><div class="wrap"><nav aria-label="Site"><a href="index.html">About Cladi</a><a href="#shop">Shop</a><a href="#me">My fit card</a><a href="cladi-fit.html">Check any size chart</a><a href="index.html#join">Sell on Cladi</a></nav><span>© 2026 Cladi. Built in Nairobi.</span><span>Fit advice is a guide based on your measurements and the seller’s.</span></div></footer>
 <div class="toast" id="toast" hidden></div>
 
 <script>

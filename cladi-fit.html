@@ -234,8 +234,9 @@
 
 <nav class="top">
   <div class="wrap">
-    <a href="#top" class="wordmark">Cladi<small>Fit</small></a>
+    <a href="index.html" class="wordmark">Cladi<small>Fit</small></a>
     <div class="nav-links">
+      <a href="cladi-app.html" class="keep">Shop</a>
       <a href="#check">Check a fit</a>
       <a href="#sellers">For sellers</a>
       <a href="#stores">For stores</a>
@@ -419,6 +420,7 @@
         <span class="status now">Building now</span>
         <h3>On Cladi listings</h3>
         <p>Every thrift item carries its own measurements, so the fit line is exact for that one piece rather than a guess across a size range.</p>
+        <a href="cladi-app.html" class="btn ghost" style="align-self:flex-start;margin-top:6px">Try it on the rack</a>
       </div>
       <div>
         <span class="status next">Next</span>
@@ -464,8 +466,8 @@
 
 <footer>
   <div class="wrap">
-    <span class="wordmark" style="font-size:15px">Cladi</span>
-    <span>Built in Nairobi.</span>
+    <a href="index.html" class="wordmark" style="font-size:15px">Cladi</a>
+    <span style="display:flex;gap:18px;flex-wrap:wrap"><a href="cladi-app.html">Shop</a><a href="cladi-app.html#me">My fit card</a><a href="index.html">About</a><span>Built in Nairobi.</span></span>
     <p class="src">Return figure: Coresight Research survey of US apparel retailers (2023), where 53% named size and fit as the top return reason. Example trousers chart taken from a public product page, used for illustration. Fit advice is guidance based on the measurements you enter.</p>
   </div>
 </footer>
@@ -487,6 +489,10 @@
       {size:'XXL',waist:38.2, hips:48.4, inseam:31.7},
     ]
   };
+  try{
+    const card = JSON.parse(localStorage.getItem('cladi-fitcard-v1') || 'null');
+    if(card && card.waist){ state.waist = card.waist/2.54; if(card.hips) state.hips = card.hips/2.54; if(card.inseam) state.inseam = card.inseam/2.54; if(card.pref) state.fit = card.pref; }
+  }catch(e){}
   try{
     const s = JSON.parse(localStorage.getItem('cladi-fit-card') || 'null');
     if(s){ ['unit','waist','hips','inseam','fit'].forEach(k => { if(s[k] !== undefined) state[k] = s[k]; }); }
